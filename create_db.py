@@ -10,9 +10,10 @@ import sys
 import secrets.admin_secrets
 import secrets.client_secrets
 
-MONGO_ADMIN_URL = "mongodb://{}:{}@localhost:{}/admin".format(
+MONGO_ADMIN_URL = "mongodb://{}:{}@{}:{}/admin".format(
     secrets.admin_secrets.admin_user,
     secrets.admin_secrets.admin_pw,
+    secrets.admin_secrets.host, 
     secrets.admin_secrets.port)
 
 try: 

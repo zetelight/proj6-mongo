@@ -13,6 +13,7 @@ Representation conventions for dates:
 """
 
 import flask
+from flask import g
 from flask import render_template
 from flask import request
 from flask import url_for
@@ -21,32 +22,41 @@ import json
 import logging
 
 # Date handling 
-import arrow # Replacement for datetime, based on moment.js
-import datetime # But we may still need time
+import arrow    # Replacement for datetime, based on moment.js
+# import datetime # But we may still need time
 from dateutil import tz  # For interpreting local times
 
 # Mongo database
 from pymongo import MongoClient
-
+import secrets.admin_secrets
+import secrets.client_secrets
+MONGO_CLIENT_URL = "mongodb://{}:{}@localhost:{}/{}".format(
+    secrets.client_secrets.db_user,
+    secrets.client_secrets.db_user_pw,
+    secrets.admin_secrets.port, 
+    secrets.client_secrets.db)
 
 ###
 # Globals
 ###
 import CONFIG
-
 app = flask.Flask(__name__)
+app.secret_key = CONFIG.secret_key
+
+####
+# Database connection per server process
+###
 
 try: 
-    dbclient = MongoClient(CONFIG.MONGO_URL)
-    db = dbclient.memos
+    dbclient = MongoClient(MONGO_CLIENT_URL)
+    db = getattr(dbclient, secrets.client_secrets.db)
     collection = db.dated
 
 except:
     print("Failure opening database.  Is Mongo running? Correct password?")
     sys.exit(1)
 
-import uuid
-app.secret_key = str(uuid.uuid4())
+
 
 ###
 # Pages
@@ -56,8 +66,8 @@ app.secret_key = str(uuid.uuid4())
 @app.route("/index")
 def index():
   app.logger.debug("Main page entry")
-  flask.session['memos'] = get_memos()
-  for memo in flask.session['memos']:
+  g.memos = get_memos()
+  for memo in g.memos: 
       app.logger.debug("Memo: " + str(memo))
   return flask.render_template('index.html')
 
@@ -82,14 +92,6 @@ def page_not_found(error):
 #
 #################
 
-# NOT TESTED with this application; may need revision 
-#@app.template_filter( 'fmtdate' )
-# def format_arrow_date( date ):
-#     try: 
-#         normal = arrow.get( date )
-#         return normal.to('local').format("ddd MM/DD/YYYY")
-#     except:
-#         return "(bad date)"
 
 @app.template_filter( 'humanize' )
 def humanize_arrow_date( date ):
@@ -132,18 +134,8 @@ def get_memos():
 
 
 if __name__ == "__main__":
-    # App is created above so that it will
-    # exist whether this is 'main' or not
-    # (e.g., if we are running in a CGI script)
     app.debug=CONFIG.DEBUG
     app.logger.setLevel(logging.DEBUG)
-    # We run on localhost only if debugging,
-    # otherwise accessible to world
-    if CONFIG.DEBUG:
-        # Reachable only from the same computer
-        app.run(port=CONFIG.PORT)
-    else:
-        # Reachable from anywhere 
-        app.run(port=CONFIG.PORT,host="0.0.0.0")
+    app.run(port=CONFIG.PORT,host="0.0.0.0")
 
     

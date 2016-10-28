@@ -1,4 +1,4 @@
-# proj5-mongo
+# proj6-mongo
 Simple list of dated memos kept in MongoDB database
 
 ## What is here
@@ -15,15 +15,24 @@ The user should be able to delete memos.
 
 ## Setting up
 
-The most difficult, or at least frustrating, part is setting up the MongoDB database.  Use mongoctl on ix to create
-your database.  On your own computer, 'mongod' is the program that starts the database process.  In either place, 
-'mongo' is a shell that allows you to interact with the database through a sort of command line interface.  Javascript is 
-the shell language of MongoDB. 
+Our use of the database is pretty simple, but you should anticipate
+that installing MongoDB could take some time.  Since you may not be
+able to install the same version of MongoDB on your development
+computer and your Pi, it will be especially important to test your
+project on the Pi. 
 
-You will need to create an administrative user for your database, and a non-administrative user with readWrite access to a
-'memos' database.  Note that MongoDB on ix is version 2.4, while your computer probably has version 3.x.  The procedures for
-adding a user are somewhat different between versions. 
+The version of MongoDB available for installing on Raspberry Pi with
+apt-get is 2.4.  The version you can find for your development
+computer is probably 3.x.  You may even have difficulty finding
+documentation for 2.4, as it is considered obsolete.  However,
+commands that work for 2.4 still seem to work for 3.x, so you should
+write your application and support scripts to use 2.4.   The
+difference that may cause you the most headaches is in creating
+database user accounts (which are different than the Unix accounts for
+users). 
 
-In Python, the pymongo API works with both versions of MongoDB, so it's only the initial setup where you have to be 
+In Python, the pymongo API works with both versions of MongoDB, so
+it's only the initial setup where you have to be  
 careful to use the right version-specific commands. 
+
 

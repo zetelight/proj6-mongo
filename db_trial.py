@@ -5,19 +5,32 @@ outside of Flask.
 We want to open our MongoDB database,
 insert some memos, and read them back
 """
-import arrow
 
-# Mongo database
+import pymongo
 from pymongo import MongoClient
-import CONFIG
-try: 
-    dbclient = MongoClient(CONFIG.MONGO_URL)
-    db = dbclient.memos
-    collection = db.dated
+import arrow
+import sys
 
-except:
-    print("Failure opening database.  Is Mongo running? Correct password?")
+import secrets.admin_secrets
+import secrets.client_secrets
+
+MONGO_CLIENT_URL = "mongodb://{}:{}@localhost:{}/{}".format(
+    secrets.client_secrets.db_user,
+    secrets.client_secrets.db_user_pw,
+    secrets.admin_secrets.port, 
+    secrets.client_secrets.db)
+
+try: 
+    dbclient = MongoClient(MONGO_CLIENT_URL)
+    db = getattr(dbclient, secrets.client_secrets.db)
+    print("Got database")
+    collection = db.sample
+    print("Using sample collection")
+except Exception as err:
+    print("Failed")
+    print(err)
     sys.exit(1)
+
 
 #
 # Insertions:  I commented these out after the first

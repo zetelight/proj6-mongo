@@ -1,5 +1,5 @@
 #
-# Project 3:  Vocabulary game with AJAX interaction
+# Project 6: Memos of Mongo
 #
 # Gnu make and bash are required. 
 #
@@ -32,7 +32,7 @@ env:
 #  with debugging turned on unless it is unset in CONFIG.py
 # 
 run:	env
-	($(INVENV) python3 flask_controls.py) ||  true
+	($(INVENV) python3 flask_main.py) ||  true
 
 # 'make service' runs as a background job under the gunicorn 
 #  WSGI server. FIXME:  A real production service would use 
@@ -44,7 +44,7 @@ run:	env
 # 
 service:	env
 	echo "Launching green unicorn in background"
-	($(INVENV) gunicorn --bind="0.0.0.0:8000" flask_controls:app )&
+	($(INVENV) gunicorn --bind="0.0.0.0:8000" flask_main:app )&
 
 ##
 ## Run test suite. 

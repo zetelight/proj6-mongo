@@ -21,27 +21,36 @@ from flask import url_for
 import json
 import logging
 
+import sys
+
 # Date handling 
-import arrow    # Replacement for datetime, based on moment.js
-# import datetime # But we may still need time
+import arrow   
 from dateutil import tz  # For interpreting local times
 
 # Mongo database
 from pymongo import MongoClient
-import secrets.admin_secrets
-import secrets.client_secrets
-MONGO_CLIENT_URL = "mongodb://{}:{}@localhost:{}/{}".format(
-    secrets.client_secrets.db_user,
-    secrets.client_secrets.db_user_pw,
-    secrets.admin_secrets.port, 
-    secrets.client_secrets.db)
+
+import config
+CONFIG = config.configuration()
+
+
+MONGO_CLIENT_URL = "mongodb://{}:{}@{}:{}/{}".format(
+    CONFIG.DB_USER,
+    CONFIG.DB_USER_PW,
+    CONFIG.DB_HOST, 
+    CONFIG.DB_PORT, 
+    CONFIG.DB)
+
+
+print("Using URL '{}'".format(MONGO_CLIENT_URL))
+
 
 ###
 # Globals
 ###
-import CONFIG
+
 app = flask.Flask(__name__)
-app.secret_key = CONFIG.secret_key
+app.secret_key = CONFIG.SECRET_KEY
 
 ####
 # Database connection per server process
@@ -49,7 +58,7 @@ app.secret_key = CONFIG.secret_key
 
 try: 
     dbclient = MongoClient(MONGO_CLIENT_URL)
-    db = getattr(dbclient, secrets.client_secrets.db)
+    db = getattr(dbclient, CONFIG.DB)
     collection = db.dated
 
 except:
@@ -71,6 +80,10 @@ def index():
       app.logger.debug("Memo: " + str(memo))
   return flask.render_template('index.html')
 
+
+@app.route("/jstest")
+def jstest():
+    return flask.render_template('jstest.html')
 
 # We don't have an interface for creating memos yet
 # @app.route("/create")

@@ -11,19 +11,21 @@ from pymongo import MongoClient
 import arrow
 import sys
 
-import secrets.admin_secrets
-import secrets.client_secrets
+import config
+CONFIG = config.configuration()
 
 MONGO_CLIENT_URL = "mongodb://{}:{}@{}:{}/{}".format(
-    secrets.client_secrets.db_user,
-    secrets.client_secrets.db_user_pw,
-    secrets.admin_secrets.host, 
-    secrets.admin_secrets.port, 
-    secrets.client_secrets.db)
+    CONFIG.DB_USER,
+    CONFIG.DB_USER_PW,
+    CONFIG.DB_HOST, 
+    CONFIG.DB_PORT, 
+    CONFIG.DB)
+
+print("Using URL '{}'".format(MONGO_CLIENT_URL))
 
 try: 
     dbclient = MongoClient(MONGO_CLIENT_URL)
-    db = getattr(dbclient, secrets.client_secrets.db)
+    db = getattr(dbclient, CONFIG.DB)
     print("Got database")
     collection = db.dated
     print("Using sample collection")
@@ -42,13 +44,20 @@ record = { "type": "dated_memo",
            "date":  arrow.utcnow().naive,
            "text": "This is a sample memo"
           }
+
+print("Inserting 1")
 collection.insert(record)
+print("Inserted")
 
 record = { "type": "dated_memo", 
            "date":  arrow.utcnow().replace(days=+1).naive,
            "text": "Sample one day later"
           }
+
+print("Inserting 2")
 collection.insert(record)
+print("Inserted")
+
 
 #
 # Read database --- May be useful to see what is in there,
@@ -56,6 +65,8 @@ collection.insert(record)
 # but they aren't very readable.  If you have more than a couple records,
 # you'll want a loop for printing them in a nicer format. 
 #
+
+print("Reading database")
 
 records = [ ] 
 for record in collection.find( { "type": "dated_memo" } ):
@@ -65,4 +76,5 @@ for record in collection.find( { "type": "dated_memo" } ):
            "text": record['text']
     })
 
+print("Records: ")
 print(records)

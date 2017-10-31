@@ -4,55 +4,36 @@
 # Gnu make and bash are required. 
 #
 # To run from source: 
-#    bash ./configure
+#    make install
 #    make run 
 # 
-#  'make configure' is no longer supported.  Type "bash configure" 
-#  or ". configure" or "source configure" instead (this may depend on 
-#  your environment.
 
 
 # Many recipes need to be run in the virtual environment, 
 # so run them as $(INVENV) command
 INVENV = . env/bin/activate ;
 
-Makefile.local: 
-	echo "You must run the 'configure' script before using make"
-
-include Makefile.local  ## Where customizations go 
 
 ##
 ##  Virtual environment
 ##     
+PYVENV = python3 -m venv
 env:
 	$(PYVENV)  env
 	($(INVENV) pip install -r requirements.txt )
 
-# 'make run' runs Flask's built-in test server, 
-#  with debugging turned on unless it is unset in CONFIG.py
-# 
-run:	env
-	($(INVENV) python3 flask_main.py) ||  true
+install:  env  credentials
 
-# 'make service' runs as a background job under the gunicorn 
-#  WSGI server. FIXME:  A real production service would use 
-#  NGINX in combination with gunicorn to prevent DOS attacks. 
+# 'make run' runs the built-in Flask server.  Useful for debugging,
+# but not suitable for long-running service.
 #
-#  For now we are running gunicorn on its default port of 8000. 
-#  FIXME: Configuration builder could put the desired port number
-#  into Makefile.local. 
-# 
-service:	env
-	echo "Launching green unicorn in background"
-	($(INVENV) gunicorn --bind="0.0.0.0:8000" flask_main:app )&
+credentials:  memos/credentials.ini
+memos/credentials.ini:
+	echo "You just install the database and credentials.ini for it"
 
-##
-## Run test suite. 
-## Currently 'nose' takes care of this, but in future we 
-## might add test cases that can't be run under 'nose' 
-##
-test:	env
-	$(INVENV) nosetests
+run:	env credentials
+	$(INVENV) cd memos; python3 flask_main.py
+
 
 
 ##
@@ -69,14 +50,13 @@ dist:	env
 # requires re-running installation and configuration steps
 # 
 clean:
-	rm -f *.pyc
-	rm -rf __pycache__
+	cd memos; rm -f *.pyc
+	cd memos; rm -rf __pycache__
 
 veryclean:
 	make clean
-	rm -f CONFIG.py
 	rm -rf env
-	rm -f Makefile.local
+
 
 
 

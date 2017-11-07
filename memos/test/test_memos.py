@@ -1,4 +1,4 @@
-"""
+C"""
 Nose tests for memos
 
 We cannot test for randomness here (no effective oracle),

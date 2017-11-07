@@ -26,13 +26,16 @@ install:  env  credentials
 
 # 'make run' runs the built-in Flask server.  Useful for debugging,
 # but not suitable for long-running service.
-#
+# 'make test' will run a test suite in the test folder
 credentials:  memos/credentials.ini
 memos/credentials.ini:
 	echo "You just install the database and credentials.ini for it"
 
 run:	env credentials
 	$(INVENV) cd memos; python3 flask_main.py
+
+test:	env
+	($(INVENV) cd memos; nosetests)
 
 
 

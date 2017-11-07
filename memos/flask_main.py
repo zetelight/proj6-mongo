@@ -24,26 +24,24 @@ import logging
 import sys
 
 # Date handling 
-import arrow   
+import arrow
 from dateutil import tz  # For interpreting local times
 
 # Mongo database
 from pymongo import MongoClient
 
 import config
-CONFIG = config.configuration()
 
+CONFIG = config.configuration()
 
 MONGO_CLIENT_URL = "mongodb://{}:{}@{}:{}/{}".format(
     CONFIG.DB_USER,
     CONFIG.DB_USER_PW,
-    CONFIG.DB_HOST, 
-    CONFIG.DB_PORT, 
+    CONFIG.DB_HOST,
+    CONFIG.DB_PORT,
     CONFIG.DB)
 
-
 print("Using URL '{}'".format(MONGO_CLIENT_URL))
-
 
 ###
 # Globals
@@ -56,7 +54,7 @@ app.secret_key = CONFIG.SECRET_KEY
 # Database connection per server process
 ###
 
-try: 
+try:
     dbclient = MongoClient(MONGO_CLIENT_URL)
     db = getattr(dbclient, CONFIG.DB)
     collection = db.dated
@@ -66,7 +64,6 @@ except:
     sys.exit(1)
 
 
-
 ###
 # Pages
 ###
@@ -74,22 +71,18 @@ except:
 @app.route("/")
 @app.route("/index")
 def index():
-  app.logger.debug("Main page entry")
-  g.memos = get_memos()
-  for memo in g.memos: 
-      app.logger.debug("Memo: " + str(memo))
-  return flask.render_template('index.html')
+    app.logger.debug("Main page entry")
+    g.memos = get_memos()
+    for memo in g.memos:
+        app.logger.debug("Memo: " + str(memo))
+    return flask.render_template('index.html')
 
-
-@app.route("/jstest")
-def jstest():
-    return flask.render_template('jstest.html')
 
 # We don't have an interface for creating memos yet
-# @app.route("/create")
-# def create():
-#     app.logger.debug("Create")
-#     return flask.render_template('create.html')
+@app.route("/create")
+def create():
+    app.logger.debug("Create")
+    return flask.render_template('create.html')
 
 
 @app.errorhandler(404)
@@ -99,6 +92,45 @@ def page_not_found(error):
                                  badurl=request.base_url,
                                  linkback=url_for("index")), 404
 
+
+#######################
+
+# Form handler.
+
+#######################
+@app.route("/_memo", methods=["POST"])
+def memo():
+    app.logger.debug("Entering create")
+    date = flask.request.form["datepicker"]
+
+    memos = flask.request.form["memos"]
+    app.logger.debug("The new memos: {}".format(memos))
+
+    new_date = arrow.get(date, "MM/DD/YYYY").shift(hours=-8).naive
+    app.logger.debug("The new date: {}".format(new_date))
+
+    token = collection.count() + 1
+    app.logger.debug("The new token: {}".format(token))
+
+    record = {"type": "dated_memo",
+              "date": new_date,
+              "text": memos,
+              "token": token}
+    collection.insert_one(record)
+    app.logger.debug("a new record was inserted")
+    return flask.redirect(flask.url_for("index"))
+
+
+@app.route("/_delete", methods=["POST"])
+def delete():
+    app.logger.debug("try to delete memos")
+    tokens = flask.request.form.getlist("token")
+    app.logger.debug("The token: {}".format(tokens))
+    for token in tokens:
+        collection.delete_one({'token': int(token)})
+    return flask.redirect(flask.url_for("index"))
+
+
 #################
 #
 # Functions used within the templates
@@ -106,8 +138,8 @@ def page_not_found(error):
 #################
 
 
-@app.template_filter( 'humanize' )
-def humanize_arrow_date( date ):
+@app.template_filter('humanize')
+def humanize_arrow_date(date):
     """
     Date is internal UTC ISO format string.
     Output should be "today", "yesterday", "in 5 days", etc.
@@ -117,13 +149,15 @@ def humanize_arrow_date( date ):
     try:
         then = arrow.get(date).to('local')
         now = arrow.utcnow().to('local')
+        app.logger.debug("The new date: {}".format(then))
+        app.logger.debug("The new date: {}".format(now))
         if then.date() == now.date():
             human = "Today"
-        else: 
+        else:
             human = then.humanize(now)
             if human == "in a day":
                 human = "Tomorrow"
-    except: 
+    except:
         human = date
     return human
 
@@ -138,17 +172,16 @@ def get_memos():
     Returns all memos in the database, in a form that
     can be inserted directly in the 'session' object.
     """
-    records = [ ]
-    for record in collection.find( { "type": "dated_memo" } ):
+    records = []
+    for record in collection.find({"type": "dated_memo"}):
         record['date'] = arrow.get(record['date']).isoformat()
         del record['_id']
         records.append(record)
-    return records 
+    records.sort(key=lambda r: r['date'])
+    return records
 
 
 if __name__ == "__main__":
-    app.debug=CONFIG.DEBUG
+    app.debug = CONFIG.DEBUG
     app.logger.setLevel(logging.DEBUG)
-    app.run(port=CONFIG.PORT,host="0.0.0.0")
-
-    
+    app.run(port=CONFIG.PORT, host="0.0.0.0")

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create memos</title>
+
+    <!--Credit: https://jqueryui.com/datepicker/ -->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(function () {
+            $("#datepicker").datepicker();
+        });
+    </script>
+
+</head>
+<body>
+<div>
+    <b>Create your memo here</b>
+    <p>The date has the built-in date-picker. You also can type the date there.</p>
+    <p>The format of date should be MM/DD/YYYY.</p>
+    <p>
+    </p>
+    <form id="entry" method="POST" action="/_memo">
+        <p>Date: <input type="text" id="datepicker" name="datepicker"></p>
+        <!--I am new for HTML, so I don't have a fancy way to create multi-lines-->
+        <br/>
+        <br/>
+        <br/>
+        <textarea rows="10" cols="50" id="memos" name="memos">Make your memos here...</textarea>
+        <br/>
+        <button type="submit" value="Submit">Submit</button>
+        <button type="cancel" onclick="window.location='/index';return false;">Cancel</button>
+
+    </form>
+</div>
+</body>
+</html>

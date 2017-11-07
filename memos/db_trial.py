@@ -35,7 +35,6 @@ except Exception as err:
     print(err)
     sys.exit(1)
 
-
 #
 # Insertions:  I commented these out after the first
 # run successfuly inserted them

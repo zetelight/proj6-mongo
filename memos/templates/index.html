@@ -20,20 +20,13 @@
 
     <!-- Our own style sheet -->
     <link rel="stylesheet" href="/static/css/memos.css"/>
-{#    <script>#}
-{#        $(function () {#}
-{#        $('#delete').click(function () {#}
-{#            var val = [];#}
-{#            $(':checkbox:checked').each(function (i) {#}
-{#                val[i] = $(this).val();#}
-{#            });#}
-{#        });#}
-{#    });</script>#}
 
 </head>
 <body>
 <div class="container">
-
+    <p>In this project is that it assumes the client and the server are in the same time zone,
+        but we're not required to do so for the project
+    </p>
     <!-- Flashed messages before content -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}

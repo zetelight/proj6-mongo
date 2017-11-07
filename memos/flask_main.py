@@ -106,7 +106,7 @@ def memo():
     memos = flask.request.form["memos"]
     app.logger.debug("The new memos: {}".format(memos))
 
-    new_date = arrow.get(date, "MM/DD/YYYY").shift(hours=-8).naive
+    new_date = arrow.get(date, "MM/DD/YYYY").naive
     app.logger.debug("The new date: {}".format(new_date))
 
     token = collection.count() + 1

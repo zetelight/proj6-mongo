@@ -1,4 +1,4 @@
-"""
+C"""
 Nose tests for memos
 
 We cannot test for randomness here (no effective oracle),
@@ -15,7 +15,7 @@ import nose  # Testing framework
 import logging
 from db_trial import *
 
-ONFIG = config.configuration(proxied=True)
+CONFIG = config.configuration(proxied=True)
 
 logging.basicConfig(format='%(levelname)s:%(message)s',
                     level=logging.WARNING)

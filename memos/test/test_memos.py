@@ -42,19 +42,18 @@ except Exception as err:
     sys.exit(1)
 
 # Note: I use for loop to test much test cases.
-collection.delete_many({})  # Let the datebase be empty first.
 test_case = 10
-
+init_number = collection.count()
 
 def test_save_memos():
-    assert len(collection.count()) == 0
+    assert len(collection.count()) == init_number
     for i in range(test_case):
         record = {"type": "dated_memo",
                   "date": arrow.utcnow().replace(days=+i).naive,
                   "text": "No." + str(i) + "This is a sample memo",
                   "token": i}
         collection.insert_one(record)
-        assert len(collection.count()) == i + 1
+        assert len(collection.count()) == i + 1 + init_number
 
 
 def test_list_memos():
@@ -71,7 +70,7 @@ def test_list_memos():
 
 
 def test_delete_memos():
-    assert len(collection.count()) == test_case
+    assert len(collection.count()) == test_case + init_number
     for i in range(test_case):
         collection.delete_one({'token': i})
-        assert len(collection.count()) == test_case - i
+        assert len(collection.count()) == test_case + init_number - i - 1

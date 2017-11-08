@@ -1,4 +1,4 @@
-C"""
+"""
 Nose tests for memos
 
 We cannot test for randomness here (no effective oracle),
@@ -46,14 +46,14 @@ test_case = 10
 init_number = collection.count()
 
 def test_save_memos():
-    assert len(collection.count()) == init_number
+    assert collection.count() == init_number
     for i in range(test_case):
         record = {"type": "dated_memo",
                   "date": arrow.utcnow().replace(days=+i).naive,
                   "text": "No." + str(i) + "This is a sample memo",
                   "token": i}
         collection.insert_one(record)
-        assert len(collection.count()) == i + 1 + init_number
+        assert collection.count() == i + 1 + init_number
 
 
 def test_list_memos():
@@ -70,7 +70,7 @@ def test_list_memos():
 
 
 def test_delete_memos():
-    assert len(collection.count()) == test_case + init_number
+    assert collection.count() == test_case + init_number
     for i in range(test_case):
         collection.delete_one({'token': i})
-        assert len(collection.count()) == test_case + init_number - i - 1
+        assert collection.count() == test_case + init_number - i - 1

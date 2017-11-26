@@ -20,7 +20,7 @@ INVENV = . env/bin/activate ;
 PYVENV = python3 -m venv
 env:
 	$(PYVENV)  env
-	($(INVENV) pip install -r requirements.txt )
+	$(INVENV) pip install -r requirements.txt
 
 install:  env  credentials
 
